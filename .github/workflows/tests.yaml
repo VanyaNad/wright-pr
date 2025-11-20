@@ -1,0 +1,52 @@
+name: Tests Run
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          playwright install --with-deps
+
+      - name: Run tests
+        env:
+          STAND_USER: ${{ secrets.STAND_USER }}
+          LOCKED_USER: ${{ secrets.LOCKED_USER }}
+          PROBLEM_USER: ${{ secrets.PROBLEM_USER }}
+          PERF_GLITCH_USER: ${{ secrets.PERF_GLITCH_USER }}
+          ERROR_USER: ${{ secrets.ERROR_USER }}
+          VISUAL_USER: ${{ secrets.VISUAL_USER }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        run: |
+          source .venv/bin/activate
+          pytest --tracing=retain-on-failure
+
+      - name: Upload custom HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: custom-report
+          path: result/custom_report.html
+
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: traces
+          path: test-results/
