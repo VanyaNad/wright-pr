@@ -12,19 +12,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Build Docker image
+        run: docker build -t my-playwright-tests .
 
-      - name: Install dependencies
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          pip install -r requirements.txt
-          playwright install --with-deps
-
-      - name: Run tests
+      - name: Run tests in Docker
         env:
           STAND_USER: ${{ secrets.STAND_USER }}
           LOCKED_USER: ${{ secrets.LOCKED_USER }}
@@ -34,8 +25,18 @@ jobs:
           VISUAL_USER: ${{ secrets.VISUAL_USER }}
           PASSWORD: ${{ secrets.PASSWORD }}
         run: |
-          source .venv/bin/activate
-          pytest --tracing=retain-on-failure
+          docker run --rm \
+            -v "$PWD":/app \
+            -w /app \
+            -e STAND_USER \
+            -e LOCKED_USER \
+            -e PROBLEM_USER \
+            -e PERF_GLITCH_USER \
+            -e ERROR_USER \
+            -e VISUAL_USER \
+            -e PASSWORD \
+            my-playwright-tests \
+            pytest --tracing=retain-on-failure
 
       - name: Upload custom HTML report
         if: always()
