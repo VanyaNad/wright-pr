@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Playwright Test Report</title>
+    <style>
+        body { font-family: sans-serif; background: #111; color: #eee; }
+        h1 { color: #fff; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #444; padding: 8px; text-align: left; }
+        th { background: #222; }
+        .passed { color: #7CFC00; }
+        .failed { color: #FF6347; }
+        .skipped { color: #FFD700; }
+        pre { white-space: pre-wrap; font-size: 12px; }
+    </style>
+</head>
+<body>
+<h1>Test Report</h1>
+<p>
+    Total: {{ summary.total }},
+    Passed: <span class="passed">{{ summary.passed }}</span>,
+    Failed: <span class="failed">{{ summary.failed }}</span>,
+    Skipped: <span class="skipped">{{ summary.skipped }}</span>
+</p>
+
+<table>
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Test</th>
+        <th>Outcome</th>
+        <th>Duration (s)</th>
+        <th>Node ID</th>
+        <th>Error</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for t in tests %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ t.name }}</td>
+            <td class="{{ t.outcome }}">{{ t.outcome }}</td>
+            <td>{{ "%.3f"|format(t.duration) }}</td>
+            <td>{{ t.nodeid }}</td>
+            <td><pre>{{ t.error or "" }}</pre></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
